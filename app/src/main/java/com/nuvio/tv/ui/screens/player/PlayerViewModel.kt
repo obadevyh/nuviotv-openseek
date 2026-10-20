@@ -225,6 +225,24 @@ class PlayerViewModel @Inject constructor(
 
     fun getCurrentFileSizeBytes(): Long? = controller.currentVideoSize
 
+    /** What OpenSeek needs to find or build thumbnails for the video that is playing; null for sources it cannot use. */
+    fun openSeekRequest(durationMs: Long): com.nuvio.tv.openseek.OpenSeekRepository.PlaybackRequest? {
+        val url = controller.getCurrentStreamUrl()
+        if (url.isBlank()) return null
+        val imdb = Regex("tt[0-9]{5,12}").find(controller.contentId.orEmpty())?.value
+            ?: Regex("tt[0-9]{5,12}").find(controller.currentVideoId.orEmpty())?.value
+        val isSeries = controller.contentType.equals("series", ignoreCase = true) || controller.contentType.equals("tv", ignoreCase = true)
+        return com.nuvio.tv.openseek.OpenSeekRepository.PlaybackRequest(
+            url = url,
+            headers = controller.getCurrentHeaders(),
+            durationMs = durationMs,
+            imdb = imdb,
+            season = if (isSeries) controller.currentSeason else null,
+            episode = if (isSeries) controller.currentEpisode else null,
+            sizeBytes = controller.currentVideoSize,
+        )
+    }
+
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     fun getPlayerNativeMemoryBytes(): Long? {
         val allocator = controller._loadControl?.allocator as? androidx.media3.exoplayer.upstream.DefaultAllocator ?: return null

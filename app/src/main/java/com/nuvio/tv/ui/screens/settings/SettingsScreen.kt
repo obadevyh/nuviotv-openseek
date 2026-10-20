@@ -108,7 +108,8 @@ private enum class IntegrationSettingsSection {
     Debrid,
     Tmdb,
     MdbList,
-    AnimeSkip
+    AnimeSkip,
+    OpenSeek
 }
 
 internal enum class SettingsSectionDestination {
@@ -1052,6 +1053,7 @@ private fun IntegrationSettingsContent(
         onSelectSection(IntegrationSettingsSection.Hub)
     }
     val hubEntryFocusRequester = initialFocusRequester ?: hubFocusRequester
+    val openSeekFocusRequester = remember { FocusRequester() }
 
     LaunchedEffect(selectedSection, autoFocusEnabled) {
         if (!autoFocusEnabled) return@LaunchedEffect
@@ -1061,6 +1063,7 @@ private fun IntegrationSettingsContent(
             IntegrationSettingsSection.Tmdb -> tmdbFocusRequester
             IntegrationSettingsSection.MdbList -> mdbListFocusRequester
             IntegrationSettingsSection.AnimeSkip -> animeSkipFocusRequester
+            IntegrationSettingsSection.OpenSeek -> openSeekFocusRequester
         }
         runCatching { requester.requestFocus() }
     }
@@ -1120,6 +1123,14 @@ private fun IntegrationSettingsContent(
                                     onClick = { onSelectSection(IntegrationSettingsSection.AnimeSkip) }
                                 )
                             }
+                            item(key = "integration_hub_openseek") {
+                                SettingsActionRow(
+                                    title = "OpenSeek",
+                                    subtitle = "Seek-bar thumbnail previews from your own server",
+                                    leadingIcon = Icons.Default.CloudDownload,
+                                    onClick = { onSelectSection(IntegrationSettingsSection.OpenSeek) }
+                                )
+                            }
                         }
                         SettingsVerticalScrollIndicators(state = integrationHubState)
                     }
@@ -1148,6 +1159,12 @@ private fun IntegrationSettingsContent(
         IntegrationSettingsSection.AnimeSkip -> {
             AnimeSkipSettingsContent(
                 initialFocusRequester = animeSkipFocusRequester
+            )
+        }
+
+        IntegrationSettingsSection.OpenSeek -> {
+            OpenSeekSettingsContent(
+                initialFocusRequester = openSeekFocusRequester
             )
         }
     }
